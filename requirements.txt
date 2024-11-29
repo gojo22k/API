@@ -1,7 +1,6 @@
 requests
 IMDbPY
 pyrogram
-logging
 asyncio
 pyyaml
 html

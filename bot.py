@@ -11,7 +11,7 @@ import json
 # Initialize the Pyrogram client with the necessary parameters
 app = Client("anime_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-# TCP check function
+# TCP check function with updated port 8000
 def check_tcp_connection(host, port):
     """Checks if a TCP connection can be made to the specified host and port."""
     try:
@@ -148,11 +148,11 @@ async def aniflix_api(client, message: Message):
     except Exception as e:
         await message.reply(f"Error fetching anime data: {str(e)}")
 
-# TCP check before starting bot
+# TCP check before starting bot (modified to port 8000)
 async def tcp_check():
     """Ensure TCP connection is available for deployment"""
     host = "your-deployment-host.com"  # Koyeb or your server's IP address
-    port = 80  # Or the specific port number used for your service
+    port = 8000  # Port 8000 as per your request
     if check_tcp_connection(host, port):
         return True
     else:

@@ -1,0 +1,200 @@
+https://api.jikan.moe/v4/seasons/upcoming
+
+https://api.jikan.moe/v4/top/anime?sfw
+
+https://api.jikan.moe/v4/top/anime?type=movie
+
+
+
+import requests
+from imdb import IMDb
+from cloud import fetch_all_cloud_folders
+
+def fetch_jikan_data(anime_name):
+    print(f"Fetching Jikan data for {anime_name}...")
+    jikan_url = f"https://api.jikan.moe/v4/anime?q={anime_name}"
+    try:
+        response = requests.get(jikan_url)
+        print(f"Jikan URL: {jikan_url}")
+        print(f"Jikan raw response: {response.text}")
+        response.raise_for_status()
+        data = response.json()
+
+        if data.get("data"):
+            anime = data["data"][0]
+            mal_id = anime.get("mal_id")
+
+            # Fetch trailer if available
+            trailer = anime.get("trailer", {}).get("url")
+            if trailer and "youtube.com" in trailer:
+                trailer = f"https://www.youtube.com/embed/{trailer.split('?v=')[-1]}?enablejsapi=1&wmode=opaque&autoplay=1&loop=1"
+
+            genres = ", ".join(genre["name"] for genre in anime.get("genres", []))
+            return {
+                "type": anime.get("type", "Unknown"),
+                "pg_rating": anime.get("rating", "N/A"),
+                "poster": anime["images"]["jpg"]["large_image_url"] if anime.get("images") else "N/A",
+                "trailer": trailer or "N/A",
+                "genre": genres if genres else "N/A",
+            }
+        return None
+    except requests.RequestException as e:
+        print(f"Error fetching Jikan data for {anime_name}: {e}")
+        return None
+
+def fetch_kitsu_data(anime_name):
+    print(f"Fetching Kitsu data for {anime_name}...")
+    kitsu_url = f"https://kitsu.io/api/edge/anime?filter[text]={anime_name}"
+    try:
+        response = requests.get(kitsu_url)
+        print(f"Kitsu URL: {kitsu_url}")
+        print(f"Kitsu raw response: {response.text}")
+        response.raise_for_status()
+        data = response.json()
+
+        if data.get("data"):
+            anime = data["data"][0]
+            attributes = anime["attributes"]
+
+            youtube_trailer = f"https://www.youtube.com/embed/{attributes.get('youtubeVideoId')}" if attributes.get("youtubeVideoId") else None
+
+            return {
+                "status": attributes.get("status", "Unknown").capitalize(),
+                "total_episodes": attributes.get("episodeCount", "N/A"),
+                "poster": attributes["posterImage"]["original"] if attributes.get("posterImage") else "N/A",
+                "banner": attributes["coverImage"]["original"] if attributes.get("coverImage") else "N/A",
+                "synopsis": attributes.get("synopsis", "No synopsis available."),
+                "trailer": youtube_trailer or "N/A",
+            }
+        return None
+    except requests.RequestException as e:
+        print(f"Error fetching Kitsu data for {anime_name}: {e}")
+        return None
+
+def fetch_imdb_data(anime_name):
+    print(f"Fetching IMDb data for {anime_name}...")
+    ia = IMDb()
+    try:
+        search_results = ia.search_movie(anime_name)
+        print(f"IMDb search results: {search_results}")
+        if search_results:
+            movie = search_results[0]
+            ia.update(movie)
+            print(f"IMDb raw data: {movie}")
+
+            return {
+                "imdb_rating": movie.get("rating", "N/A"),
+                "imdb_votes": movie.get("votes", "N/A"),
+            }
+        return None
+    except Exception as e:
+        print(f"Error fetching IMDb data for {anime_name}: {e}")
+        return None
+
+def fetch_complete_data():
+    print("Fetching folder data...")
+    enriched_data = []
+    folders = fetch_all_cloud_folders()
+    print(f"Fetched folders: {folders}")
+
+    for folder in folders:
+        anime_name = folder["name"]
+        aid = folder["AID"]
+        let = folder["LET"]
+        cname = folder["CNAME"]
+        cids = folder["CIDs"]
+
+        print(f"Processing folder: {anime_name} (AID: {aid}, LET: {let})")
+
+        kitsu_data = fetch_kitsu_data(anime_name) or {}
+        jikan_data = fetch_jikan_data(anime_name) or {}
+        imdb_data = fetch_imdb_data(anime_name) or {}
+
+        enriched_data.append({
+            "AID": aid,
+            "LET": let,
+            "NAME": anime_name,
+            "CNAME": cname,
+            "CIDs": cids,
+            **kitsu_data,
+            **jikan_data,
+            **imdb_data,
+        })
+        print(f"Enriched data for {anime_name}: {enriched_data[-1]}")
+
+    return enriched_data
+
+if __name__ == "__main__":
+    complete_data = fetch_complete_data()
+    for anime in complete_data:
+        print(
+            f"AID: {anime['AID']} LET: {anime['LET']} NAME: {anime['NAME']} "
+            f"CNAME: {anime['CNAME']} CID: {anime['CIDs']}\n"
+            f"Genre: {anime.get('genre', 'N/A')}\n"
+            f"Status: {anime.get('status', 'N/A')}\n"
+            f"Total Episodes: {anime.get('total_episodes', 'N/A')}\n"
+            f"Poster: {anime.get('poster', 'N/A')}\n"
+            f"Banner: {anime.get('banner', 'N/A')}\n"
+            f"Synopsis: {anime.get('synopsis', 'N/A')}\n"
+            f"PG Rating: {anime.get('pg_rating', 'N/A')}\n"
+            f"Type: {anime.get('type', 'N/A')}\n"
+            f"Trailer: {anime.get('trailer', 'N/A')}\n"
+            f"Similar Anime: {anime.get('sanime', 'N/A')}\n"
+            f"IMDb Rating: {anime.get('imdb_rating', 'N/A')}\n"
+            f"IMDb Votes: {anime.get('imdb_votes', 'N/A')}\n"
+        )
+
+
+
+
+
+
+
+
+
+
+def fetch_imdb_data(anime_name):
+    """
+    Fetch IMDb rating and score using IMDbPY.
+    """
+    print(f"Fetching IMDb data for {anime_name}...")
+    ia = IMDb()
+    try:
+        search_results = ia.search_movie(anime_name)
+        print(f"IMDb search results: {search_results}")
+        if search_results:
+            movie = search_results[0]
+            ia.update(movie)
+            print(f"IMDb raw data: {movie}")
+
+            return {
+                "imdb_rating": movie.get("rating", "N/A"),
+                "imdb_votes": movie.get("votes", "N/A"),
+                "poster": movie.get("cover url", "N/A"),
+                "trailer": movie.get("trailer", {}).get("url", "N/A"),
+            }
+        return None
+    except Exception as e:
+        print(f"Error fetching IMDb data for {anime_name}: {e}")
+        return None
+
+
+videos: ['http://www.imdb.com/title/tt0409591/videoplayer/vi370853401', 'http://www.imdb.com/title/tt0409591/videoplayer/vi3113746713']
+
+
+
+# Get the pattern from the user
+pattern = input("Enter the pattern (e.g., '*'): ")
+
+# Get the number of repetitions
+repetitions = int(input("Enter the number of times the pattern should be repeated: "))
+
+# Display the pattern using loops
+for i in range(1, repetitions + 1):
+    print((pattern + " ") * i)
+
+
+
+☽ ✩
+
+https://envs.sh/zZl.mp4

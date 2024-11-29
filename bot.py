@@ -161,11 +161,11 @@ async def tcp_check():
 async def main():
     """Run the bot after TCP check"""
     if await tcp_check():
-        await app.run()
+        # Only start the bot after the check passes
+        await app.start()
+        await app.send_message("your-telegram-id", "TCP connection successful. Bot started!")
     else:
         print("TCP connection failed. Exiting...")
-        # Optionally, alert the admin via a message
-        await app.send_message("your-telegram-id", "TCP connection failed. Bot not started.")
 
 if __name__ == '__main__':
     asyncio.run(main())

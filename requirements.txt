@@ -3,6 +3,5 @@ IMDbPY
 pyrogram
 asyncio
 pyyaml
-html
 collections
 base64

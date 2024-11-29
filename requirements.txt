@@ -1,7 +1,4 @@
 requests
 IMDbPY
 pyrogram
-asyncio
 pyyaml
-collections
-base64

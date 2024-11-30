@@ -1,24 +1,39 @@
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import threading
 import subprocess
 import requests
 import asyncio
-import socket
+# import logging
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from config import *
 from db import fetch_data_from_db
 import json
 
+# # Set up logging
+# logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+#                     level=logging.INFO)
+# logger = logging.getLogger(__name__)
+
 # Initialize the Pyrogram client with the necessary parameters
 app = Client("anime_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-# TCP check function with updated port 8000
-def check_tcp_connection(host, port):
-    """Checks if a TCP connection can be made to the specified host and port."""
-    try:
-        with socket.create_connection((host, port), timeout=10):
-            return True
-    except (socket.timeout, socket.error) as e:
-        return False
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b'OK')
+
+def run_health_check_server():
+    server_address = ('', 8000)
+    httpd = HTTPServer(server_address, HealthCheckHandler)
+    httpd.serve_forever()
+
+@app.on_message(filters.command("start"))
+async def start(client, message: Message):
+    """Send a welcome message on /start"""
+    await message.reply("Welcome to the Anime Bot! Use the available commands to interact.")
 
 async def run_script_and_send_output(script_name, message: Message):
     """Runs a script and sends each line of output as a message when it completes"""
@@ -43,11 +58,6 @@ async def run_script_and_send_output(script_name, message: Message):
         
     except Exception as e:
         await message.reply(f"Error running script: {str(e)}")
-
-@app.on_message(filters.command("start"))
-async def start(client, message: Message):
-    """Send a welcome message on /start"""
-    await message.reply("Welcome to the Anime Bot! Use the available commands to interact.")
 
 @app.on_message(filters.command("fast_update"))
 async def fast_update(client, message: Message):
@@ -122,6 +132,7 @@ async def check(client, message: Message):
     except Exception as e:
         await message.reply(f"Error checking statuses: {str(e)}")
 
+
 @app.on_message(filters.command("aniflix_api"))
 async def aniflix_api(client, message: Message):
     """Fetch all AIDs and names from the database"""
@@ -148,24 +159,11 @@ async def aniflix_api(client, message: Message):
     except Exception as e:
         await message.reply(f"Error fetching anime data: {str(e)}")
 
-# TCP check before starting bot (modified to port 8000)
-async def tcp_check():
-    """Ensure TCP connection is available for deployment"""
-    host = "your-deployment-host.com"  # Koyeb or your server's IP address
-    port = 8000  # Port 8000 as per your request
-    if check_tcp_connection(host, port):
-        return True
-    else:
-        return False
-
-async def main():
-    """Run the bot after TCP check"""
-    if await tcp_check():
-        # Only start the bot after the check passes
-        await app.start()
-        await app.send_message("your-telegram-id", "TCP connection successful. Bot started!")
-    else:
-        print("TCP connection failed. Exiting...")
-
-if __name__ == '__main__':
-    asyncio.run(main())
+if __name__ == "__main__":
+    # Start health check server in a separate thread
+    health_check_thread = threading.Thread(target=run_health_check_server)
+    health_check_thread.daemon = True
+    health_check_thread.start()
+    
+    # Start the bot
+    app.run()

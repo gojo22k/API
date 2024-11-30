@@ -106,7 +106,7 @@ async def check(client, message: Message):
             if git_response.status_code == 200:
                 status_report += "✅ Git Token: Valid\n"
             else:
-                status_report += f"❌ Git Token: Invalid - {git_response.status_code}\n"
+                status_report += f"❌ Git Token: Invalid - {git_response.status_code}, {GIT_TOKEN}\n"
         except Exception as e:
             status_report += f"❌ Git Token: Error - {str(e)}\n"
         

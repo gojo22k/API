@@ -183,7 +183,7 @@ def fetch_complete_data(folders=None):
             folder = {"name": folder}
 
         anime_name = folder["name"]
-        aid = folder.get("AID", "N/A")
+        aid = folder.get("AID") or folder.get("aid") or "N/A"
         let = folder.get("LET", "N/A")
         cname = folder.get("CNAME", "N/A")
         cids = folder.get("CIDs", "N/A")

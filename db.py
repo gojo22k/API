@@ -2,13 +2,7 @@ import base64
 import requests
 import os
 import json
-
-# File paths and messages
-OWNER = 'gojo22k'
-REPO = 'ADATA'
-PATH = 'anime_data.txt'
-MESSAGE = 'Update anime_data.txt'
-GIT_TOKEN = os.getenv('GIT_TOKEN', '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')
+from config import *
 
 def fetch_data_from_db():
     """

@@ -11,7 +11,7 @@ OWNER = 'OtakuFlix'
 REPO = 'ADATA'
 PATH = 'anime_data.txt'
 MESSAGE = 'Update anime_data.txt'
-GIT_TOKEN = os.getenv('GIT_TOKEN', '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')
+GIT_TOKEN = os.getenv('GIT_TOKEN', '')
 
 # API keys for different platforms
 MIXDROP_API_KEY = 'gAR2UJ0JE2RKlhJJCqE'

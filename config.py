@@ -11,7 +11,7 @@ OWNER = 'gojo22k'
 REPO = 'ADATA'
 PATH = 'anime_data.txt'
 MESSAGE = 'Update anime_data.txt'
-GIT_TOKEN = os.getenv('GIT_TOKEN', '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')
+GIT_TOKEN = os.getenv('GIT_TOKEN', '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')
 
 # API keys for different platforms
 MIXDROP_API_KEY = 'gAR2UJ0JE2RKlhJJCqE'

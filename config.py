@@ -7,11 +7,11 @@ API_HASH = '2a99a1375e26295626c04b4606f72752'
 BOT_TOKEN = '7096468759:AAG-wghQPw-u_jD1PXcB0GvZl5qH4iFICYY'
 OWNER_ID = 1740287480
 # File paths and messages
-OWNER = 'gojo22k'
+OWNER = 'OtakuFlix'
 REPO = 'ADATA'
 PATH = 'anime_data.txt'
 MESSAGE = 'Update anime_data.txt'
-GIT_TOKEN = os.getenv('GIT_TOKEN', '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')
+GIT_TOKEN = os.getenv('GIT_TOKEN', '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')
 
 # API keys for different platforms
 MIXDROP_API_KEY = 'gAR2UJ0JE2RKlhJJCqE'

@@ -35,49 +35,53 @@ async def start(client, message: Message):
     """Send a welcome message on /start"""
     await message.reply("Welcome to the Anime Bot! Use the available commands to interact.")
 
-async def run_script_and_send_output(script_name, message: Message):
-    """Runs a script and sends each line of output as a message when it completes"""
+async def stream_script_output(script_name, message: Message):
+    """
+    Runs a script and streams its output line by line to the user as Telegram messages.
+    """
     try:
-        process = subprocess.Popen(['python', script_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(
+            ['python', script_name],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1  # Line-buffered output
+        )
         
-        # Read stdout and send it line by line as it is generated
-        while True:
-            stdout_line = process.stdout.readline()
-            if stdout_line == b"" and process.poll() is not None:
-                break
-            if stdout_line:
-                await message.reply(stdout_line.decode('utf-8').strip())
+        # Stream stdout in real-time
+        for stdout_line in iter(process.stdout.readline, ""):
+            if stdout_line:  # If there's any line to send, send it immediately
+                await message.reply(stdout_line.strip())
         
-        # Check if there's any error in stderr
-        stderr_line = process.stderr.read()
-        if stderr_line:
-            await message.reply(stderr_line.decode('utf-8').strip())
-        
-        # Wait for the process to finish
+        # Wait for process to complete
+        process.stdout.close()
         process.wait()
+
+        # Check if there are any errors
+        if process.returncode != 0:
+            stderr_output = process.stderr.read()
+            if stderr_output:
+                await message.reply(f"Error: {stderr_output.strip()}")
         
+        process.stderr.close()
+
     except Exception as e:
         await message.reply(f"Error running script: {str(e)}")
 
 @app.on_message(filters.command("fast_update"))
 async def fast_update(client, message: Message):
-    """Trigger the check1.py script"""
+    """Trigger the check1.py script and stream output live."""
     await message.reply("Running fast update...")
-    try:
-        await run_script_and_send_output('check1.py', message)
-        await message.reply("Fast update completed successfully!")
-    except Exception as e:
-        await message.reply(f"Error during fast update: {str(e)}")
+    await stream_script_output('check1.py', message)
+    await message.reply("Fast update process finished.")
 
 @app.on_message(filters.command("update_all"))
 async def update_all(client, message: Message):
-    """Trigger the update_all.py script"""
+    """Trigger the update_all.py script and stream output live."""
     await message.reply("Running full update...")
-    try:
-        await run_script_and_send_output('update_all.py', message)
-        await message.reply("Full update completed successfully!")
-    except Exception as e:
-        await message.reply(f"Error during full update: {str(e)}")
+    await stream_script_output('update_all.py', message)
+    await message.reply("Full update process finished.")
+
 
 @app.on_message(filters.command("check"))
 async def check(client, message: Message):

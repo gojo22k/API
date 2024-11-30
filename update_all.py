@@ -1,6 +1,8 @@
 from addon import fetch_complete_data
 import json
 import subprocess
+import sys
+sys.stdout.reconfigure(line_buffering=True)
 
 def fetch_and_update():
     """

@@ -4,7 +4,8 @@ from db import fetch_data_from_db  # Function to fetch data from DB
 from addon import fetch_complete_data  # Function to fetch full anime data
 import subprocess  # To call the update.py script
 import logging
-
+import sys
+sys.stdout.reconfigure(line_buffering=True)
 # Set up logging configuration
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 

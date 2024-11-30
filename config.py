@@ -4,14 +4,14 @@ import os
 # Telegram API credentials
 API_ID = 25198711
 API_HASH = '2a99a1375e26295626c04b4606f72752'
-BOT_TOKEN = '7393513769:AAGq3Ur1HJaYRJx-fro3kM3Ei26AOZMYauU'
+BOT_TOKEN = '7096468759:AAG-wghQPw-u_jD1PXcB0GvZl5qH4iFICYY'
 OWNER_ID = 1740287480
 # File paths and messages
 OWNER = 'gojo22k'
 REPO = 'ADATA'
 PATH = 'anime_data.txt'
 MESSAGE = 'Update anime_data.txt'
-GIT_TOKEN = os.getenv('GIT_TOKEN', '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')
+GIT_TOKEN = os.getenv('GIT_TOKEN', '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')
 
 # API keys for different platforms
 MIXDROP_API_KEY = 'gAR2UJ0JE2RKlhJJCqE'

@@ -117,11 +117,14 @@ def fetch_list_anime(mal_id):
     except requests.RequestException:
         return "N/A"
 
+import requests
+
 def fetch_jikan_data(anime_name):
     """
-    Fetch additional anime details using the Jikan v4 API and include related anime, trailers, and banners.
+    Fetch additional anime details using the Jikan v4 API, including studios, producers,
+    trailers, banners, genres, and related anime.
     """
-    jikan_url = f"https://api.jikan.moe/v4/anime?q={anime_name}"
+    jikan_url = f"https://api.jikan.moe/v4/anime?q={anime_name}&limit=1"
     try:
         response = requests.get(jikan_url)
         response.raise_for_status()
@@ -149,6 +152,10 @@ def fetch_jikan_data(anime_name):
             genres = ", ".join(genre["name"] for genre in anime.get("genres", []))
             listanime = fetch_list_anime(mal_id)  # Fetch related anime using the mal_id
 
+            # Studios and producers
+            studios = ", ".join(studio["name"] for studio in anime.get("studios", []))
+            producers = ", ".join(producer["name"] for producer in anime.get("producers", []))
+
             return {
                 "type": anime.get("type", "Unknown"),
                 "jname": anime.get("title_japanese", "Unknown"),
@@ -158,6 +165,8 @@ def fetch_jikan_data(anime_name):
                 "jtrailer": trailer,
                 "jbanner": jbanner_url,
                 "genre": genres if genres else "N/A",
+                "studios": studios if studios else "N/A",
+                "producers": producers if producers else "N/A",
                 "listanime": listanime,  # Store the list of related anime
                 "sanime": fetch_similar_anime(mal_id) or "N/A",  # Similar anime
             }
@@ -165,7 +174,6 @@ def fetch_jikan_data(anime_name):
     except requests.RequestException as e:
         print(f"Error fetching Jikan data for {anime_name}: {e}")
         return None
-
 
 def fetch_complete_data(folders=None):
     """
@@ -212,6 +220,8 @@ def fetch_complete_data(folders=None):
             "kposter": kitsu_data.get("kposter", "N/A"),
             "jposter": jikan_data.get("jposter", "N/A"),
             "airing": jikan_data.get("airing", "false"),
+            "producers": jikan_data.get("producers", "N/A"),
+            "studios": jikan_data.get("studios", "N/A"),
             "iposter": imdb_data.get("iposter", "N/A"),
             "ktrailer": kitsu_data.get("ktrailer", "N/A"),
             "jtrailer": jikan_data.get("jtrailer", "N/A"),
@@ -245,6 +255,8 @@ if __name__ == "__main__":
             f"Genre: {anime.get('genre', 'N/A')}\n"
             f"Type: {anime.get('type', 'N/A')}\n"
             f"Status: {anime.get('status', 'N/A')}\n"
+            f"Studio: {anime.get('studios', 'N/A')}\n"
+            f"Producers: {anime.get('producers', 'N/A')}\n"
             f"Airing: {anime.get('airing', 'N/A')}\n"
             f"Total Episodes: {anime.get('total_episodes', 'N/A')}\n"
             f"PG Rating: {anime.get('pg_rating', 'N/A')}\n"

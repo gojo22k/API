@@ -169,10 +169,9 @@ async def check(client, message: Message):
     except Exception as e:
         await message.reply(f"Error checking statuses: {str(e)}")
 
-
 @app.on_message(filters.command("aniflix_api"))
 async def aniflix_api(client, message: Message):
-    """Fetch all AIDs and names from the database"""
+    """Fetch all AIDs and names from the database in chunks to avoid long messages."""
     await message.reply("Fetching anime data...")
     try:
         # Fetch the raw data from the database (GitHub)
@@ -189,12 +188,17 @@ async def aniflix_api(client, message: Message):
         anime_list = [f"{anime['name']} - AID: {anime['aid']}" for anime in anime_data]
         
         if anime_list:
-            await message.reply("\n".join(anime_list))
+            # Break the list into chunks of 30 items (or suitable size to fit Telegram limits)
+            chunk_size = 30
+            for i in range(0, len(anime_list), chunk_size):
+                chunk = anime_list[i:i + chunk_size]
+                await message.reply("\n".join(chunk))
         else:
             await message.reply("No anime data found.")
         
     except Exception as e:
         await message.reply(f"Error fetching anime data: {str(e)}")
+
 
 if __name__ == "__main__":
     # Start health check server in a separate thread

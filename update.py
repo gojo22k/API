@@ -23,6 +23,8 @@ def process_input_data(input_data):
                 "type": anime.get("type") or anime.get("type", "N/A"),
                 "status": anime.get("status") or anime.get("STATUS", "N/A"),
                 "airing": anime.get("airing") or anime.get("airing", "false"),
+                "studio": anime.get("studios") or anime.get("airing", "N/A"),
+                "producers": anime.get("producers") or anime.get("airing", "N/A"),
                 "total_episodes": anime.get("total_episodes") or anime.get("TOTAL_EPISODES", "N/A"),
                 "pg_rating": anime.get("pg_rating") or anime.get("PG_RATING", "N/A"),
                 "sanime": anime.get("sanime") or anime.get("SANIME", "N/A"),

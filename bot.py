@@ -4,6 +4,7 @@ import subprocess
 import requests
 import asyncio
 # import logging
+from pyrogram.filters import user, command
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from config import *
@@ -30,6 +31,38 @@ def run_health_check_server():
     httpd = HTTPServer(server_address, HealthCheckHandler)
     httpd.serve_forever()
 
+# Custom decorator to restrict commands to admins
+def admin_only():
+    def wrapper(_, __, message: Message):
+        return message.from_user.id in ADMINS
+    return filters.create(wrapper)
+
+# Handler for authorized commands
+@app.on_message(filters.command(["start", "fast_update", "update_all", "check", "aniflix_api"]) & admin_only())
+async def authorized_handler(client, message: Message):
+    """Authorized commands for admins."""
+    command = message.command[0]
+    if command == "start":
+        await message.reply("Welcome to the Anime Bot! Use the available commands to interact.")
+    elif command == "fast_update":
+        await message.reply("Running fast update...")
+        await stream_script_output('check1.py', message)
+        await message.reply("Fast update process finished.")
+    elif command == "update_all":
+        await message.reply("Running full update...")
+        await stream_script_output('update_all.py', message)
+        await message.reply("Full update process finished.")
+    elif command == "check":
+        await check(client, message)
+    elif command == "aniflix_api":
+        await aniflix_api(client, message)
+
+# Fallback for non-admins
+@app.on_message(filters.command(["start", "fast_update", "update_all", "check", "aniflix_api"]) & ~admin_only())
+async def unauthorized_handler(client, message: Message):
+    """Notify unauthorized users."""
+    await message.reply("⛔ You are not authorized to use this command.")
+    
 @app.on_message(filters.command("start"))
 async def start(client, message: Message):
     """Send a welcome message on /start"""

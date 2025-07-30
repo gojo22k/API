@@ -5,20 +5,30 @@ from cloud import fetch_all_cloud_folders
 # Function to shorten image URL using freeimage.host API
 def shorten_image_url(image_url):
     """
-    Shorten the image URL using freeimage.host.
+    Shorten the image URL using freeimage.host with API key.
     """
+    api_key = '6d207e02198a847aa98d0a2a901485a5'
+    endpoint = 'https://freeimage.host/api/1/upload'
+
     try:
-        response = requests.post('https://freeimage.host/api/1/upload', data={
-            'image': image_url,
-        })
+        params = {
+            'key': api_key,
+            'source': image_url,
+            'format': 'json'
+        }
+        response = requests.get(endpoint, params=params)
         response.raise_for_status()
         data = response.json()
-        
+
         if data.get('image') and data['image'].get('url'):
             return data['image']['url']
+
+        print(f"API response error: {data}")
+        return image_url
+
     except requests.RequestException as e:
         print(f"Error shortening image URL: {e}")
-        return image_url  # Return the original URL if shortening fails
+        return image_url
 
 
 def fetch_kitsu_data(anime_name):
